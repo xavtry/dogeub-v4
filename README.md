@@ -1,3 +1,4 @@
+# This version is outdated, we highly recommend using [V5!](https://github.com/DogeNetwork/dogeub)
 ## Doge Unblocker
 Doge Unblocker is a site unblocker powered by [Ultraviolet](https://github.com/titaniumnetwork-dev/Ultraviolet). Our service allows you to **get around internet restrictions** to visit your favorite sites and apps, without worrying about your browsing history being saved or your internet being blocked.
 ### Key Features:
