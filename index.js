@@ -1,6 +1,7 @@
 import express from 'express';
 import http from 'node:http';
 import path from 'node:path';
+import fs from 'fs';
 import { epoxyPath } from "@mercuryworkshop/epoxy-transport";
 import { baremuxPath } from "@mercuryworkshop/bare-mux/node";
 import { createBareServer } from "@tomphttp/bare-server-node";
@@ -16,6 +17,34 @@ const bareServer = createBareServer('/seal/');
 const app = express(server);
 const version = packageJson.version;
 const discord = 'https://discord.gg/unblocking';
+
+// -------------------- VISIT COUNTER --------------------
+const counterFile = path.join(__dirname, 'visits.json');
+let visitCount = 0;
+
+// Load saved visits
+if (fs.existsSync(counterFile)) {
+  try {
+    const data = fs.readFileSync(counterFile, 'utf8');
+    const json = JSON.parse(data);
+    visitCount = json.count || 0;
+  } catch (err) {
+    console.error('Error reading visit counter:', err);
+  }
+}
+
+// Save function
+function saveVisitCount() {
+  fs.writeFileSync(counterFile, JSON.stringify({ count: visitCount }));
+}
+
+// API route for frontend
+app.get('/api/visits', (req, res) => {
+  res.json({ count: visitCount });
+});
+
+// -------------------------------------------------------
+
 const routes = [
   { route: '/mastery', file: './static/loader.html' },
   { route: '/apps', file: './static/apps.html' },
@@ -26,16 +55,18 @@ const routes = [
 ];
 
 app.use(express.json());
-app.use(
-  express.urlencoded({
-    extended: true,
-  })
-);
-
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'static')));
 app.use("/uv/", express.static(uvPath));
 app.use("/epoxy/", express.static(epoxyPath));
 app.use("/baremux/", express.static(baremuxPath));
+
+// ✅ Home page visit counter
+app.get('/', (req, res) => {
+  visitCount++;
+  saveVisitCount();
+  res.sendFile(path.join(__dirname, './static/index.html'));
+});
 
 routes.forEach(({ route, file }) => {
   app.get(route, (req, res) => {
@@ -104,7 +135,4 @@ function shutdown(signal) {
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 process.on('SIGINT', () => shutdown('SIGINT'));
 
-
-server.listen({
-  port: 8001,
-});
+server.listen({ port: 8001 });
