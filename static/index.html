@@ -1,5 +1,17 @@
 <!DOCTYPE html>
 <html>
+  <p id="visitCount">Loading visits...</p>
+<script>
+fetch('/api/visits')
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById('visitCount').innerText = `👥 Visits: ${data.count}`;
+  })
+  .catch(() => {
+    document.getElementById('visitCount').innerText = 'Error loading count';
+  });
+</script>
+
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
@@ -46,3 +58,4 @@
 </div>
 </body>
 </html>
+
